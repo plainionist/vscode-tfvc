@@ -81,10 +81,9 @@
 				},
 				"tfvc.autoCheckout": {
 					"type": "string",
-					"default": "on edit",
+					"default": "on save",
 					"enum": [
 						"none",
-						"on edit",
 						"on save"
 					],
 					"enumDescriptions": [
@@ -179,7 +178,7 @@
 		"pretest": "npm run compile && npm run lint",
 		"test": "node ./out/test/runTest.js",
 		"package": "vsce package",
-		"install": "code --install-extension vscode-tfvc-1.0.0.vsix",
+		"install": "code --install-extension tfs-vc-1.0.0.vsix",
 		"patch": "npm run package && npm run install"
 	},
 	"devDependencies": {

@@ -76,10 +76,6 @@ export function activate(context: vscode.ExtensionContext) {
 function registerAutoCheckout(scm: SCM): vscode.Disposable {
 	const autoCheckout = vscode.workspace.getConfiguration('tfvc').get<string>('autoCheckout');
 	switch (autoCheckout) {
-		case 'on edit':
-			registeredAutoCheckout = vscode.workspace.onDidChangeTextDocument(event => scm.checkout(event.document.fileName, false));
-			break;
-
 		case 'on save':
 			registeredAutoCheckout = vscode.workspace.onWillSaveTextDocument(event => scm.checkout(event.document.fileName, false));
 			break;
