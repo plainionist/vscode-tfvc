@@ -179,7 +179,8 @@
 		"pretest": "npm run compile && npm run lint",
 		"test": "node ./out/test/runTest.js",
 		"package": "vsce package",
-		"install": "code --install-extension vscode-tfvc-0.5.0.vsix"
+		"install": "code --install-extension vscode-tfvc-0.5.0.vsix",
+		"patch": "npm run package && npm run install"
 	},
 	"devDependencies": {
 		"@types/glob": "^8.1.0",

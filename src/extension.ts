@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { SCM } from './scm';
 
 let registeredAutoCheckout: vscode.Disposable;
+let scm: SCM;
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -12,7 +13,8 @@ export function activate(context: vscode.ExtensionContext) {
 		return;
 	}
 
-	const scm = new SCM(context);
+	scm = new SCM();
+	scm.init(context);
 
 	context.subscriptions.push(
 		// TODO: write a shared wrapper for this three commands 
@@ -91,4 +93,5 @@ function registerAutoCheckout(scm: SCM): vscode.Disposable {
 
 export function deactivate() {
 	registeredAutoCheckout.dispose();
+	scm.dispose();
 }
