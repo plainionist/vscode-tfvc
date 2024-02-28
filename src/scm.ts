@@ -42,7 +42,7 @@ export class SCM {
 
                 progress.report({ message: `The source control has been refreshed successfully.` });
 
-            } catch (error) {
+            } catch (error:any) {
                 vscode.window.showErrorMessage(`Error: Cannot check the source control! (Code: ${error.code}; Error: ${error.message})`);
             }
         });
@@ -69,7 +69,7 @@ export class SCM {
                 progress.report({ message: `Refreshing the source control...` });
                 await this.refresh();
                 vscode.window.showInformationMessage(`The file has been checked out successfully.`);
-            } catch (error) {
+            } catch (error:any) {
                 vscode.window.showErrorMessage(`Error: The checkout failed! (Code: ${error.code}; Error: ${error.message})`);
             }
         });
@@ -92,7 +92,7 @@ export class SCM {
                 progress.report({ message: `Refreshing the source control...` });
                 await this.refresh();
                 vscode.window.showInformationMessage(`The check-in completed successfully.`);
-            } catch (error) {
+            } catch (error:any) {
                 vscode.window.showErrorMessage(`Error: The check-in failed! (Code: ${error.code}; Error: ${error.message})`);
             }
         });
@@ -114,7 +114,7 @@ export class SCM {
                 progress.report({ message: `Refreshing the source control...` });
                 await this.refresh();
                 vscode.window.showInformationMessage(`The undo completed successfully..`);
-            } catch (error) {
+            } catch (error:any) {
                 vscode.window.showErrorMessage(`Error: The undo failed! (Code: ${error.code}; Error: ${error.message})`);
             }
         });
