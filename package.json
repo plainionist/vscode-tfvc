@@ -1,10 +1,10 @@
 {
-	"name": "vscode-tfvc",
-	"displayName": "TFVC for VS Code",
-	"description": "Provide support in TFVC (Team Foundation Version Control) to Visual Studio Code",
-	"version": "0.5.0",
-	"publisher": "ShPelles",
-	"repository": "https://github.com/ShPelles/vscode-tfvc",
+	"name": "tfs-vc",
+	"displayName": "TFS VC (plainionist)",
+	"description": "Provide support for Team Foundation Version Control",
+	"version": "1.0.0",
+	"publisher": "plainionist",
+	"repository": "https://github.com/plainionist/vscode-tfvc",
 	"engines": {
 		"vscode": "^1.45.0"
 	},
@@ -179,7 +179,7 @@
 		"pretest": "npm run compile && npm run lint",
 		"test": "node ./out/test/runTest.js",
 		"package": "vsce package",
-		"install": "code --install-extension vscode-tfvc-0.5.0.vsix",
+		"install": "code --install-extension vscode-tfvc-1.0.0.vsix",
 		"patch": "npm run package && npm run install"
 	},
 	"devDependencies": {

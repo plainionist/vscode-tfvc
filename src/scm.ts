@@ -54,6 +54,10 @@ export class SCM implements vscode.Disposable {
   }
 
   refresh = (): Thenable<void> => {
+    if (!this.isTfsWorkspace){
+      return Promise.resolve()
+    }
+
     const progressOptions: vscode.ProgressOptions = {
       title: `Refreshing the source control...`,
       location: vscode.ProgressLocation.SourceControl
@@ -81,9 +85,13 @@ export class SCM implements vscode.Disposable {
   }
 
   checkout = (filePath: string, isManual = true) => {
+    if (!this.isTfsWorkspace){
+      return
+    }
+
     const isInsideWorkspace = filePath.toLowerCase().startsWith(this.getRootUri().toLowerCase())
-    if (!isInsideWorkspace && !isManual) {
-      this.outputChannel?.appendLine(`checkout aborted: ${isInsideWorkspace}/${isManual}`)
+    if (!isInsideWorkspace) {
+      this.outputChannel?.appendLine(`checkout of file '${filePath}'`)
       return
     }
 
@@ -113,6 +121,10 @@ export class SCM implements vscode.Disposable {
   }
 
   checkIn = async (filePath?: string | string[]) => {
+    if (!this.isTfsWorkspace){
+      return
+    }
+
     const title = `checking in ${this.createTitleSuffix(filePath)}`
     if (!(await this.confirmAction(title))) {
       return
@@ -138,6 +150,10 @@ export class SCM implements vscode.Disposable {
   }
 
   undo = async (filePath?: string | string[]) => {
+    if (!this.isTfsWorkspace){
+      return
+    }
+
     const title = `undoing ${this.createTitleSuffix(filePath)}`
     if (!(await this.confirmAction(title))) {
       return
