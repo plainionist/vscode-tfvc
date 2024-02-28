@@ -8,7 +8,7 @@ export class SCM implements vscode.Disposable {
   private changesGroup: vscode.SourceControlResourceGroup | null = null
   private decorator: Decorator | null = null
   private scm: vscode.SourceControl | null = null
-  private outputChannel: vscode.OutputChannel | null = null
+  private outputChannel: vscode.OutputChannel
   private isTfsWorkspace = false
 
   constructor() {
@@ -33,8 +33,7 @@ export class SCM implements vscode.Disposable {
   }
 
   dispose() {
-    this.outputChannel?.dispose()
-    this.outputChannel = null
+    this.outputChannel.dispose()
   }
 
   async detectTfsWorkspace(): Promise<boolean> {
@@ -44,11 +43,11 @@ export class SCM implements vscode.Disposable {
     try {
       await execTf(params)
     } catch (error: any) {
-      this.outputChannel?.appendLine(`NOT a TF VC workspace! ${error.message}`)
+      this.outputChannel.appendLine(`No TF VC workspace detected! ${error.message}`)
       return false
     }
 
-    this.outputChannel?.appendLine(`TF VC workspace detected`)
+    this.outputChannel.appendLine(`TF VC workspace detected`)
 
     return true
   }
@@ -91,13 +90,13 @@ export class SCM implements vscode.Disposable {
 
     const isInsideWorkspace = filePath.toLowerCase().startsWith(this.getRootUri().toLowerCase())
     if (!isInsideWorkspace) {
-      this.outputChannel?.appendLine(`checkout of file '${filePath}'`)
+      this.outputChannel.appendLine(`checkout of file '${filePath}'`)
       return
     }
 
     if (this.isCheckedOut(filePath)) {
       if (isManual) {
-        vscode.window.showWarningMessage('The file is already checked out.')
+        this.outputChannel.appendLine('The file is already checked out.')
       }
       return
     }
@@ -113,7 +112,7 @@ export class SCM implements vscode.Disposable {
         await execTf(params)
         progress.report({ message: `Refreshing the source control...` })
         await this.refresh()
-        vscode.window.showInformationMessage(`The file has been checked out successfully.`)
+        this.outputChannel.appendLine(`The file has been checked out successfully.`)
       } catch (error: any) {
         vscode.window.showErrorMessage(`Error: The checkout failed! (Code: ${error.code}; Error: ${error.message})`)
       }
@@ -142,7 +141,7 @@ export class SCM implements vscode.Disposable {
         await execTf(params)
         progress.report({ message: `Refreshing the source control...` })
         await this.refresh()
-        vscode.window.showInformationMessage(`The check-in completed successfully.`)
+        this.outputChannel.appendLine(`The check-in completed successfully.`)
       } catch (error: any) {
         vscode.window.showErrorMessage(`Error: The check-in failed! (Code: ${error.code}; Error: ${error.message})`)
       }
@@ -170,7 +169,7 @@ export class SCM implements vscode.Disposable {
         await execTf(params)
         progress.report({ message: `Refreshing the source control...` })
         await this.refresh()
-        vscode.window.showInformationMessage(`The undo completed successfully..`)
+        this.outputChannel.appendLine(`The undo completed successfully..`)
       } catch (error: any) {
         vscode.window.showErrorMessage(`Error: The undo failed! (Code: ${error.code}; Error: ${error.message})`)
       }
