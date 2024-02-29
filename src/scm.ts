@@ -13,7 +13,6 @@ export class SCM implements vscode.Disposable {
 
   constructor() {
     this.outputChannel = vscode.window.createOutputChannel('TFVC')
-    this.outputChannel.show(true)
   }
 
   async init(context: vscode.ExtensionContext) {
@@ -84,6 +83,7 @@ export class SCM implements vscode.Disposable {
   }
 
   checkout = (filePath: string, isManual = true) => {
+    this.outputChannel.appendLine(`checkout of file '${filePath}'`)
     if (!this.isTfsWorkspace){
       return
     }

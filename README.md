@@ -1,6 +1,6 @@
-# VS Code TFVC extension
+# VS Code TFS VC extension
 
-Provide support in TFVC (Team Foundation Version Control) to Visual Studio Code.
+Provide support for Team Foundation Version Control in VS Code
 
 ## Features
 
@@ -19,6 +19,6 @@ This extension contributes the following settings:
 * `tfvc.tfExePath`: The full path to the 'TF.EXE' file.
 * `tfvc.autoCheckout`: Defines whether the auto-load will work on saving or not at all.
 
-## Known Issues
+## Credits
 
-Right now, there aren't known issues.
+Based on https://marketplace.visualstudio.com/items?itemName=ShPelles.vscode-tfvc
