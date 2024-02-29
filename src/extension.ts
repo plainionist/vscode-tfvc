@@ -1,11 +1,30 @@
 import * as vscode from 'vscode'
 
 import { SCM } from './scm'
+import { execTf } from './tfvc'
 
 let registeredAutoCheckout: vscode.Disposable
-let scm: SCM
+let outputChannel: vscode.OutputChannel
 
-export function activate(context: vscode.ExtensionContext) {
+async function detectTfsWorkspace(outputChannel: vscode.OutputChannel): Promise<boolean> {
+  const rootUri = vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath ?? '.'
+  const params = ['vc', 'workfold', rootUri]
+
+  try {
+    await execTf(params)
+  } catch (error: any) {
+    outputChannel.appendLine(`No TF VC workspace detected! ${error.message}`)
+    return false
+  }
+
+  outputChannel.appendLine(`TF VC workspace detected`)
+
+  return true
+}
+
+export async function activate(context: vscode.ExtensionContext) {
+  vscode.commands.executeCommand('setContext', 'tfvc.isTfsWorkspace', false);
+
   if (vscode.workspace.workspaceFolders === undefined) {
     return
   }
@@ -14,8 +33,16 @@ export function activate(context: vscode.ExtensionContext) {
     return
   }
 
-  scm = new SCM()
-  scm.init(context)
+  outputChannel = vscode.window.createOutputChannel('TFVC')
+
+  const isTfsWorkspace = await detectTfsWorkspace(outputChannel)
+  if (!isTfsWorkspace) {
+    return
+  }
+
+  vscode.commands.executeCommand('setContext', 'tfvc.isTfsWorkspace', true);
+
+  const scm = new SCM(context, outputChannel)
 
   context.subscriptions.push(
     vscode.commands.registerTextEditorCommand('vscode-tfvc.checkoutCurrentFile', (editor) => {
@@ -84,7 +111,7 @@ function registerAutoCheckout(scm: SCM): vscode.Disposable {
     case 'on save':
       registeredAutoCheckout = vscode.workspace.onWillSaveTextDocument((event) => scm.checkout(event.document.fileName, false))
       break
-    
+
     default:
       registeredAutoCheckout = new vscode.Disposable(() => {})
       break
@@ -94,5 +121,5 @@ function registerAutoCheckout(scm: SCM): vscode.Disposable {
 
 export function deactivate() {
   registeredAutoCheckout.dispose()
-  scm.dispose()
+  outputChannel.dispose()
 }

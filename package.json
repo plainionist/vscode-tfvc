@@ -138,7 +138,8 @@
 			"explorer/context":[
 				{
 					"command": "vscode-tfvc.checkoutFile",
-					"group": "stage"
+					"group": "stage",
+					"when": "tfvc.isTfsWorkspace"
 				}
 			],
 			"scm/title": [

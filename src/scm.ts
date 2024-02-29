@@ -4,58 +4,27 @@ import { DOMParser } from 'xmldom'
 import { Decorator } from './decoration'
 import { execTf } from './tfvc'
 
-export class SCM implements vscode.Disposable {
-  private changesGroup: vscode.SourceControlResourceGroup | null = null
-  private decorator: Decorator | null = null
-  private scm: vscode.SourceControl | null = null
+export class SCM {
+  private changesGroup: vscode.SourceControlResourceGroup
+  private decorator: Decorator
+  private scm: vscode.SourceControl
   private outputChannel: vscode.OutputChannel
-  private isTfsWorkspace = false
 
-  constructor() {
-    this.outputChannel = vscode.window.createOutputChannel('TFVC')
-  }
+  constructor(context: vscode.ExtensionContext, outputChannel:vscode.OutputChannel) {
+    this.outputChannel = outputChannel
 
-  async init(context: vscode.ExtensionContext) {
     const rootUri = vscode.workspace.workspaceFolders?.[0]?.uri
 
-    this.isTfsWorkspace = await this.detectTfsWorkspace()
+    this.scm = vscode.scm.createSourceControl('tfvc', 'TF Version Control', rootUri)
+    this.changesGroup = this.scm.createResourceGroup('changes', 'Changes')
 
-    if (this.isTfsWorkspace) {
-      this.scm = vscode.scm.createSourceControl('tfvc', 'TF Version Control', rootUri)
-      this.changesGroup = this.scm.createResourceGroup('changes', 'Changes')
+    this.scm.inputBox.placeholder = 'Enter a check-in message'
+    this.decorator = new Decorator(context)
 
-      this.scm.inputBox.placeholder = 'Enter a check-in message'
-      this.decorator = new Decorator(context)
-
-      this.refresh()
-    }
-  }
-
-  dispose() {
-    this.outputChannel.dispose()
-  }
-
-  async detectTfsWorkspace(): Promise<boolean> {
-    const rootUri = vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath ?? '.'
-    const params = ['vc', 'workfold', rootUri]
-
-    try {
-      await execTf(params)
-    } catch (error: any) {
-      this.outputChannel.appendLine(`No TF VC workspace detected! ${error.message}`)
-      return false
-    }
-
-    this.outputChannel.appendLine(`TF VC workspace detected`)
-
-    return true
+    this.refresh()
   }
 
   refresh = (): Thenable<void> => {
-    if (!this.isTfsWorkspace){
-      return Promise.resolve()
-    }
-
     const progressOptions: vscode.ProgressOptions = {
       title: `Refreshing the source control...`,
       location: vscode.ProgressLocation.SourceControl
@@ -71,7 +40,7 @@ export class SCM implements vscode.Disposable {
         if (this.changesGroup) {
           this.changesGroup.resourceStates = elements.map((el) => ({
             resourceUri: vscode.Uri.file(el.getAttribute('local') ?? ''),
-            decorations: this.decorator?.getDecorations(el.getAttribute('chg') ?? '')
+            decorations: this.decorator.getDecorations(el.getAttribute('chg') ?? '')
           }))
         }
 
@@ -83,11 +52,6 @@ export class SCM implements vscode.Disposable {
   }
 
   checkout = (filePath: string, isManual = true) => {
-    this.outputChannel.appendLine(`checkout of file '${filePath}'`)
-    if (!this.isTfsWorkspace){
-      return
-    }
-
     const isInsideWorkspace = filePath.toLowerCase().startsWith(this.getRootUri().toLowerCase())
     if (!isInsideWorkspace) {
       this.outputChannel.appendLine(`checkout of file '${filePath}'`)
@@ -120,10 +84,6 @@ export class SCM implements vscode.Disposable {
   }
 
   checkIn = async (filePath?: string | string[]) => {
-    if (!this.isTfsWorkspace){
-      return
-    }
-
     const title = `checking in ${this.createTitleSuffix(filePath)}`
     if (!(await this.confirmAction(title))) {
       return
@@ -149,10 +109,6 @@ export class SCM implements vscode.Disposable {
   }
 
   undo = async (filePath?: string | string[]) => {
-    if (!this.isTfsWorkspace){
-      return
-    }
-
     const title = `undoing ${this.createTitleSuffix(filePath)}`
     if (!(await this.confirmAction(title))) {
       return
@@ -177,7 +133,7 @@ export class SCM implements vscode.Disposable {
   }
 
   private getRootUri = (): string => {
-    const rootUri = this.scm?.rootUri?.fsPath
+    const rootUri = this.scm.rootUri?.fsPath
     if (rootUri === undefined) {
       throw new Error('The root path not configured!')
     }
@@ -208,7 +164,7 @@ export class SCM implements vscode.Disposable {
   }
 
   private isCheckedOut = (filePath: string) => {
-    return this.changesGroup?.resourceStates.some((state) => state.resourceUri.fsPath.toLowerCase() === filePath.toLowerCase())
+    return this.changesGroup.resourceStates.some((state) => state.resourceUri.fsPath.toLowerCase() === filePath.toLowerCase())
   }
 
   private async confirmAction(action: string) {
